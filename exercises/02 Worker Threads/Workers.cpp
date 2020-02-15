@@ -5,6 +5,8 @@
 #include <vector>
 #include <functional>
 #include <iostream>
+#include "Timer.h"
+#include "Timer.cpp"
 
 using namespace std;
 
@@ -15,7 +17,9 @@ class Workers {
     private:
     const bool debug;
     const int num_threads;
-    // Thread storage
+    // epoll timer thread
+    Timer timer;
+    // Worker thread storage
     vector<thread> thread_pool;
     // Locked by task_mutex
     bool should_stop = false;
@@ -51,6 +55,22 @@ class Workers {
         }
         // Notify to one waiting thread that there's more work available
         task_cv.notify_one();
+    }
+
+    // Performs task after a given amount of milliseconds
+    // Does not guarantee that the task will be timed exactly,
+    // due to the way a typical OS scheduler works.
+    void post_timeout(function<void()> task, int milliseconds) {
+        // TODO decrappify this solution
+        // thread t([this, &task, &milliseconds] {
+        //     this_thread::sleep_for(chrono::milliseconds(milliseconds));
+        //     cout << "Waited" << endl;
+        //     post(task);
+        //     //this_thread::yield();
+        // });
+        timer.set_timer([this, task] {
+            post(task);
+        }, milliseconds);
     }
 
     // Called *once* to start all worker threads
@@ -94,6 +114,8 @@ class Workers {
                 
             });
         }
+        // start timer thread
+        timer.start();
     }
 
     // Wait for all threads to finish then stop and join them
@@ -116,12 +138,14 @@ class Workers {
         for (auto &thread : thread_pool) {
             thread.join();
         }
+        // stop timer after all else
+        timer.stop();
         if (debug) cout << "Finished, " << tasks.size() << " tasks left undone." << endl;
     }
 };
 
 int main() {
-    Workers workers(10, true);
+    Workers workers(10);
     Workers event_loop(1);
 
     workers.start();
@@ -138,10 +162,16 @@ int main() {
         cout << "Hello from event loop" << endl;
     });
 
-    event_loop.start();
-    event_loop.stop();
+    event_loop.post_timeout([] {
+        cout << "Hello after 3 seconds" << endl;
+    }, 3000);
+    event_loop.post_timeout([] {
+        cout << "Should not show up..." << endl;
+    }, 11000);
 
+    event_loop.start();
     this_thread::sleep_for(10s);
+    event_loop.stop();
 
     workers.stop();
 }
