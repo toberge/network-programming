@@ -8,21 +8,19 @@
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
 #include <atomic>
+#include <map>
 
 using namespace std;
-
-typedef struct st_event {
-    function<void()> task;
-    int fd;
-} timeout_event;
 
 class Timer {
     private:
     const int epoll_fd;
     atomic<int> stop_fd;
     std::thread timer_thread;
+    // Events get loaded into this vector
     vector<epoll_event> events;
-    list<timeout_event> timeouts;
+    // Hashmap translating event fd to task
+    map<int, function<void()>> timeouts;
     int create_event(int milliseconds);
 
     public:
