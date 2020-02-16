@@ -120,7 +120,8 @@ class Workers {
 
     // Wait for all threads to finish then stop and join them
     void stop() {
-        // TODO stop threads
+        // stop timer BEFORE all else
+        timer.stop();
         {
             unique_lock<mutex> lock(task_mutex);
             // Do not proceed if stop flag already is set
@@ -138,8 +139,6 @@ class Workers {
         for (auto &thread : thread_pool) {
             thread.join();
         }
-        // stop timer after all else
-        timer.stop();
         if (debug) cout << "Finished, " << tasks.size() << " tasks left undone." << endl;
     }
 };
@@ -166,8 +165,12 @@ int main() {
         cout << "Hello after 3 seconds" << endl;
     }, 3000);
     event_loop.post_timeout([] {
-        cout << "Should not show up..." << endl;
-    }, 11000);
+        cerr << "Should not show up..." << endl;
+    }, 21000);
+
+    workers.post_timeout([] {
+        cout << "HI after 2 seconds" << endl;
+    }, 2000);
 
     event_loop.start();
     this_thread::sleep_for(10s);

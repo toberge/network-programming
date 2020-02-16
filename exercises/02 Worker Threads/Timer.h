@@ -4,8 +4,10 @@
 #include <functional>
 #include <thread>
 #include <vector>
+#include <list>
 #include <sys/epoll.h>
 #include <sys/timerfd.h>
+#include <atomic>
 
 using namespace std;
 
@@ -17,10 +19,10 @@ typedef struct st_event {
 class Timer {
     private:
     const int epoll_fd;
-    int stop_fd;
+    atomic<int> stop_fd;
     std::thread timer_thread;
     vector<epoll_event> events;
-    vector<timeout_event> timeouts;
+    list<timeout_event> timeouts;
     int create_event(int milliseconds);
 
     public:

@@ -47,23 +47,30 @@ void Timer::start() {
     timer_thread = thread([this] {
         bool should_stop = false;
         while (!should_stop) {
-            cout << "cheek" << endl;
+            cout << "Checking, " << stop_fd.load() << endl;
             // poll & block yourself
             auto event_count = epoll_wait(epoll_fd, events.data(), events.size(), -1);
             for (int i = 0; i < event_count; i++) {
                 cout << "Got event " << events[i].data.fd << endl;
-                if (events[i].data.fd == stop_fd) {
+                if (events[i].data.fd == stop_fd.load()) {
                     // received stop signal, end thread
                     // set a flag so we can continue processing events
+                    cout << "Received stop flag" << endl;
                     should_stop = true;
                     //return;
                 } else {
-                    for (auto &event : timeouts) {
+                    //for (auto &event : timeouts) {
+                    for (auto it = timeouts.begin(); it != timeouts.end();) {
+                        auto event = *it;
                         if (events[i].data.fd == event.fd) {
                             // TODO add task to thing here or as task()?
                             epoll_ctl(epoll_fd, EPOLL_CTL_DEL, event.fd, nullptr);
                             event.task();
-                            // TODO remove event from list...
+                            // Remove event from list
+                            cout << "Doing this..." << endl;
+                            timeouts.erase(it++);
+                        } else {
+                            it++;
                         }
                     }
                 }
@@ -74,16 +81,12 @@ void Timer::start() {
 
 // Stop timer thread
 void Timer::stop() {
-    //epoll_ctl(epoll_fd, EPOLLWAKEUP, )
     // Cheesy way: Set file descriptor to check against to an added event...
     cout << "Stopping timer..." << endl;
-    stop_fd = create_event(1000);
+    stop_fd.store(create_event(1000));
+    // Then join thread as usual
     timer_thread.join();
-    // is this a valid way to formulate such a check?
-    // apparently not...
-    // if (&timer_thread != nullptr) {
-        
-    // }
+    cout << "Timer had " << timeouts.size() << " events left" << endl;
 }
 
 // int main() {
