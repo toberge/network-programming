@@ -7,6 +7,7 @@
 #include <iostream>
 #include "Timer.h"
 #include "Timer.cpp"
+#include <atomic>
 
 using namespace std;
 
@@ -22,7 +23,7 @@ class Workers {
     // Worker thread storage
     vector<thread> thread_pool;
     // Locked by task_mutex
-    bool should_stop = false;
+    atomic<bool> should_stop;
     list<function<void()>> tasks;
     // Mutex and CV
     mutex task_mutex;
@@ -35,6 +36,7 @@ class Workers {
         if (num_threads < 1) {
             cerr << "Invalid number of threads" << endl;
         }
+        should_stop.store(false);
         //this->debug = debug;
         //this->num_threads = num_threads;
     }
@@ -48,7 +50,7 @@ class Workers {
             // Lock and add task
             unique_lock<mutex> lock(task_mutex);
             // Check if threads have been stopped
-            if (should_stop) {
+            if (should_stop.load()) {
                 cerr << "Cannot add work when stop() has been called" << endl;
             }
             tasks.emplace_back(task);
@@ -93,7 +95,7 @@ class Workers {
                         while (tasks.empty()) {
                             // Stop completely if stop flag is set
                             // and no work is available
-                            if (should_stop) {
+                            if (should_stop.load()) {
                                 if (debug) cout << "Thread " << i << " stops." << endl;
                                 return;
                             }
@@ -130,7 +132,7 @@ class Workers {
                 return;
             }
             // Set stop flag
-            should_stop = true;
+            should_stop.store(true);
             if (debug) cout << "Notified all threads" << endl;
         }
         // Broadcast to all threads
@@ -144,7 +146,7 @@ class Workers {
 };
 
 int main() {
-    Workers workers(10);
+    Workers workers(10, true);
     Workers event_loop(1);
 
     workers.start();
@@ -157,8 +159,21 @@ int main() {
         });
     }
 
+    // Add work that adds work
+    for (int i = 0; i < 40; i++) {
+        workers.post([&workers] {
+            workers.post([] {
+                this_thread::sleep_for(0.5s);
+            });
+        });
+    }
+
     event_loop.post([] {
         cout << "Hello from event loop" << endl;
+    });
+
+    event_loop.post([] {
+        cout << "Second hello from event loop" << endl;
     });
 
     event_loop.post_timeout([] {
