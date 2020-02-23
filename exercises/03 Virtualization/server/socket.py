@@ -1,27 +1,17 @@
 #!/usr/bin/env python
 import asyncio
 import websockets
-import subprocess
-
-# Demonstrating injection if shell=True
-stuff = 'injection\ninnocence" | grep "t'
-print(subprocess.check_output(f'echo "{stuff}"', shell=True))
+from executor import run
+import json
 
 async def wait_and_execute(websocket, path):
     while True:
-        code = await websocket.recv()
-        print(f'< {code}')
+        data = await websocket.recv()
+        request = json.loads(data)
+        print(f'< {request["code"]}')
 
-        #result = subprocess.check_output(['python', '-c', code], text=True)
-        try:
-            result = subprocess.check_output(
-                ['docker', 'container', 'run', '--rm', 'executor', 'python', '-c', code],
-                text=True,
-                stderr=subprocess.STDOUT
-            )
-        except subprocess.CalledProcessError as error:
-            result = f'{error.output}\n\nExited with status code {error.returncode}'
-
+        result = run(request['code'], request['language'])
+        
         await websocket.send(str(result))
         print(f"> {result}")
 
