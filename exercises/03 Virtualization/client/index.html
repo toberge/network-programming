@@ -1,20 +1,44 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Hi there</title>
+    <title>write-and-run</title>
+    <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
 <body>
-    <div>
+    <header>
+        <h1>Write Some Code</h1>
+    </header>
+    <section id="editor">
         <h2>Your code here:</h2>
-        <textarea id="input" cols="80" rows="10" placeholder="Your code"></textarea>
-    </div>
-    <div>
+        <textarea
+        id="input"
+        cols="80"
+        rows="10"
+        placeholder="Your code
+Press ctr+enter to submit"></textarea>
+    </section>
+    <section id="selector">
+        <label for="language">Programming language:</label>
+        <select name="language" id="language">
+            <optgroup label="High-Level Languages">
+                <option value="python" selected>Python</option>
+            </optgroup>
+            <optgroup label="Shell Scripting">
+                <option value="bash">Bourne Again Shell (Bash)</option>
+            </optgroup>
+        </select>
+    </section>
+    <section id="submit">
+        <label for="button">Press ctrl+enter or this button to:</label>
         <button type="button" id="submit">Run your magnificent code</button>
-    </div>
-    <div>
-        <h2>Output</h2>
+    </section>
+    <section id="output">
+        <h2>Output:</h2>
         <code id="message">Your ouput</code>
-    </div>
+    </section>
+    <footer>
+        <small>Brought to you by the container house association</small>
+    </footer>
 </body>
 <script defer src="./socket.js"></script>
 </html>

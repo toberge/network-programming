@@ -1,0 +1,67 @@
+body {
+    margin: 0 1%;
+    display: grid;
+    width: 98%;
+    height: 100%;
+    grid-template-areas:
+        "header header"
+        'editor output'
+        'selector submit'
+        'footer footer';
+    column-gap: 1%;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 10% 75% auto auto;
+}
+
+header {
+    grid-area: header;
+}
+
+textarea {
+    grid-area: editor;
+}
+
+#output {
+    grid-area: output;
+}
+
+#selector {
+    grid-area: selector;
+}
+
+#submit {
+    grid-area: submit;
+}
+
+footer {
+    grid-area: footer;
+}
+
+textarea, code, body {
+    font-family: 'Fira Code', monospace;
+}
+
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
+@supports (display: grid) {
+    textarea {
+        height: 80%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+button, select {
+    width: 100%;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+h2 {
+    border-bottom: black 0.1rem solid;
+}
+

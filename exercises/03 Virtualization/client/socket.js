@@ -11,11 +11,13 @@ socket.onmessage = (event) => {
     output.innerText = event.data;
 }
 
-button.onclick = () => {    
+const submit = () => {
     console.assert(socket.readyState != 3, 'oh snapp socket closed');    
     socket.send(input.value);
     output.innerText = 'Running...';
 }
+
+button.onclick = submit;
 
 socket.onopen = () => {
     //socket.send(input.value);
@@ -24,5 +26,11 @@ socket.onopen = () => {
 
 socket.onclose = () => {
     output.innerText = 'An error occured, lost connection with server.';
+}
+
+document.onkeyup = (event) => {
+    if (event.ctrlKey && event.which == 13) {
+        submit();
+    }
 }
 
