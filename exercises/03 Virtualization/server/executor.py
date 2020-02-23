@@ -4,7 +4,8 @@ import subprocess
 # Mapping language to command
 languages = {
     'python': ['python', '-c'],
-    'sh': ['/bin/sh', '-c']
+    'sh': ['/bin/sh', '-c'],
+    'js': ['node', '-e']
 }
 
 def run(code, language):
