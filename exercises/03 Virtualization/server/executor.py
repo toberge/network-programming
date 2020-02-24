@@ -6,6 +6,7 @@ languages = {
     'python': ['python', '-c'],
     'sh': ['/bin/sh', '-c'],
     'js': ['node', '-e']
+    # 'cpp': ['stuff']
 }
 
 def run(code, language):
@@ -14,6 +15,12 @@ def run(code, language):
         return f'Invalid language, supporting {list(languages.keys())}'
     
     try:
+        # cmd = ['docker', 'container', 'run', '--rm', 'executor']
+        # if language == 'cpp':
+        #     cmd.extend(['echo', code, '>', 'src.cpp', ';' 'g++', 'src.cpp', '&&', './a.out'])
+        # else:
+        #     cmd.extend([*languages[language], code]),
+
         # Run code in a docker container
         # Spreading the command to an array and using shell=False
         # to prevent shell injection which could affect the host
@@ -31,3 +38,4 @@ if __name__ == '__main__':
     stuff = 'injection\ninnocence" | grep "t'
     print(subprocess.check_output(f'echo "{stuff}"', shell=True))
     print (run('hi', 'lolcode'))
+    print(run('print("hi")', 'python'))

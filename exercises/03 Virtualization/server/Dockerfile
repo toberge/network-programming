@@ -1,4 +1,4 @@
 FROM alpine:latest
 
-# vewy simple python thing for the moment
-RUN apk add python nodejs
+# install compilers and interpreters for various languages
+RUN apk add python nodejs gcc g++

@@ -13,23 +13,21 @@ socket.onmessage = (event) => {
 }
 
 const submit = () => {
-    console.assert(socket.readyState != 3, 'oh snapp socket closed');    
-    socket.send(JSON.stringify({
-        'code': input.value,
-        'language': select.value
-    }));
-    output.innerText = 'Running...';
+    if (socket.readyState == 3) {
+        console.error('oh snapp socket closed');    
+    } else {
+        socket.send(JSON.stringify({
+            'code': input.value,
+            'language': select.value
+        }));
+        output.innerText = 'Running...';
+    }
 }
 
 button.onclick = submit;
 
 socket.onopen = () => {
-    //socket.send(input.value);
-    // socket.send('this is a message');
-    socket.send(JSON.stringify({
-        'code': 'print("hi")',
-        'language': 'python'
-    }));
+    console.log('Connection open');
 }
 
 socket.onclose = () => {
