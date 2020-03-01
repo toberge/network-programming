@@ -19,11 +19,11 @@ def process(expression):
             if len(stack) > 1:
                 stack.append(operators[item](stack.pop(), stack.pop()))
             else:
-                return 'Too few operands, at least one missing'
+                raise Exception('Too few operands, at least one missing')
         else:
-            return 'Invalid character'
+            raise Exception('Invalid character')
     res = stack.pop()
     if len(stack) > 0:
-        return f'Too few operators, {len(stack)} missing'
+        raise Exception(f'Too few operators, {len(stack)} missing')
     else:
         return res

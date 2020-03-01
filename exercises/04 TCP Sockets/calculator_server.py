@@ -13,8 +13,12 @@ with socket.create_server(ADDRESS) as server:
             if not data: break
             expression = str(data, encoding='UTF-8')
             if expression == '': break
-            result = process(expression)
-            print('Resolved', expression.rstrip(), 'to', result)
-            connection.send(bytes('= ' + str(result) + '\n> ', encoding='UTF-8'))
+            try:
+                result = process(expression)
+                print('Resolved', expression.rstrip(), 'to', result)
+                connection.send(bytes('= ' + str(result) + '\n> ', encoding='UTF-8'))
+            except Exception as error:
+                result = str(error)
+                connection.send(bytes('ERROR: ' + str(error) + '\n> ', encoding='UTF-8'))
 
         connection.send(b'See you later alligator\n')
