@@ -1,4 +1,9 @@
 import socket
+import threading
+import socketserver
+from calculator import process
+
+
 
 ADDRESS = ('', 8080)
 
@@ -27,16 +32,27 @@ def assemble(headers):
     res += END
     return bytes(res, encoding='UTF-8')
 
-with socket.create_server(ADDRESS) as server:
-    server.listen(1)
-    (connection, remote) = server.accept()
-    with connection:
-        #while True:
-        data = connection.recv(1024)
-        plaintext = str(data, encoding='UTF-8')
+class HTTPRequestHandler(socketserver.BaseRequestHandler):
+
+    def handle(self):
+        plaintext = str(self.request.recv(1024), encoding='UTF-8')
+        print('-------------------')
+        print('Serving from {}'.format(threading.current_thread().name))
         print(plaintext)
         headers = plaintext.splitlines()
         if headers[0].startswith('GET / HTTP/1.1'):
-            connection.sendall(assemble(headers[1:-1]))
+            self.request.sendall(assemble(headers[1:-1]))
+
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
+
+if __name__ == '__main__':
+    HOST, PORT = "localhost", 8080
+
+    server = ThreadedTCPServer((HOST, PORT), HTTPRequestHandler)
+    with server:
+        ip, port = server.server_address
+        print(f'Serving at {port}')
+        server.serve_forever()
 
 # curl localhost:8080 -H "hi_there:<script>alert('aaa it burns')</script>"
