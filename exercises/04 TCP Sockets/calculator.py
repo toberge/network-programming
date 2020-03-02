@@ -11,6 +11,7 @@ operators = {
 
 def process(expression):
     """Parse and calculate an expression in RPN"""
+    if expression.strip() == '': raise Exception('Empty expression')
     stack = deque()
     for item in expression.split():
         if item.isdigit():
