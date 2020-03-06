@@ -26,9 +26,9 @@ class ThreadedCalculationHandler(socketserver.BaseRequestHandler):
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # 0 = random port
-    HOST, PORT = "localhost", 0
+    HOST, PORT = 'localhost', 0
 
     server = ThreadedTCPServer((HOST, PORT), ThreadedCalculationHandler)
     with server:

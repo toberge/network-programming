@@ -5,7 +5,7 @@ from calculator import process
 
 
 
-ADDRESS = ('', 8080)
+ADDRESS = ('localhost', 8080)
 
 START = """HTTP/1.0 200 OK
 Content-Type: text/html; charset=utf-8
@@ -42,14 +42,14 @@ class HTTPRequestHandler(socketserver.BaseRequestHandler):
         headers = plaintext.splitlines()
         if headers[0].startswith('GET / HTTP/1.1'):
             self.request.sendall(assemble(headers[1:-1]))
+        else:
+            self.request.sendall(b'HTTP/1.0 404 ERROR\n\n<h1>404 Not Found</h1>')
 
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
 if __name__ == '__main__':
-    HOST, PORT = "localhost", 8080
-
-    server = ThreadedTCPServer((HOST, PORT), HTTPRequestHandler)
+    server = ThreadedTCPServer(ADDRESS, HTTPRequestHandler)
     with server:
         ip, port = server.server_address
         print(f'Serving at {port}')
