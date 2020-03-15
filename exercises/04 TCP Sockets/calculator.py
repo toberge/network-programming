@@ -1,7 +1,5 @@
 from collections import deque
 
-# TODO throw errors and handle them
-
 operators = {
     '+': lambda x, y: y + x,
     '-': lambda x, y: y - x,

@@ -4,3 +4,4 @@
 **/__pycache__
 **/target
 exercises/03\ Virtualization/server/src
+*.class
