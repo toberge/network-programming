@@ -44,4 +44,3 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP) as soc
                 # One second per 35 chars
                 sleep(len(line) / 35)
             print()
-  
