@@ -34,7 +34,7 @@ public class JavaSSLClient {
                     }
                     
                     out.println(inputLine);
-                    System.out.println(bufferedReader.readLine());
+                    System.out.println("Client got back: " + bufferedReader.readLine());
                 }
             }
             

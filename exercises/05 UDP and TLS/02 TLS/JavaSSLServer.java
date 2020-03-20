@@ -36,7 +36,7 @@ public class JavaSSLServer {
                             new InputStreamReader(socket.getInputStream()))) {
                 String line;
                 while((line = bufferedReader.readLine()) != null){
-                    System.out.println(line);
+                    System.out.println("Server log: " + line);
                     out.println(line);
                 }
             }

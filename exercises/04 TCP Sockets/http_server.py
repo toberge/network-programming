@@ -5,7 +5,7 @@ from calculator import process
 
 
 
-ADDRESS = ('localhost', 8080)
+ADDRESS = ('192.168.2.43', 80)
 
 START = """HTTP/1.0 200 OK
 Content-Type: text/html; charset=utf-8
