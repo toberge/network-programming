@@ -6,6 +6,7 @@
         <!-- refer to the classes by package -->
         <class>leksjon.entitet1.Bok</class>
         <class>toberge.insecureBank.Account</class>
+        <class>toberge.lockedBank.LockedAccount</class>
         <!-- database access properties -->
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />

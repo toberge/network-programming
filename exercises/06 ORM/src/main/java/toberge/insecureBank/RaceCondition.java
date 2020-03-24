@@ -19,7 +19,7 @@ public class RaceCondition {
             AccountFacadeImpl dao = new AccountFacadeImpl(new AccountDAO(emf));
             String NUMBER_ONE = "2323.23.23232";
             String NUMBER_TWO = "9999.11.88888";
-            dao.addOne(new Account(NUMBER_ONE, 4000, "Gudbrand Gråstein"));
+            dao.addOne(new Account(NUMBER_ONE, 4000, "Gulbrand Gråstein"));
             dao.addOne(new Account(NUMBER_TWO, 2000, "Skrue McDuck"));
             A = new Thread(() -> {
                 Account one = dao.getOne(NUMBER_ONE);
