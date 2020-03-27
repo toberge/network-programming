@@ -1,3 +1,4 @@
+import sys
 import socket
 import threading
 import socketserver
@@ -5,7 +6,9 @@ from calculator import process
 
 
 
-ADDRESS = ('192.168.2.43', 80)
+ADDRESS = ('', 80)
+if len(sys.argv) == 2 and sys.argv[1]:
+    ADDRESS = (sys.argv[1], 80)
 
 START = """HTTP/1.0 200 OK
 Content-Type: text/html; charset=utf-8

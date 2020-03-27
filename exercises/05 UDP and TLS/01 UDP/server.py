@@ -6,7 +6,6 @@ import threading
 
 def handle(data, remote):
     expression = str(data, encoding='UTF-8')
-        # if expression == '': continue
     try:
         result = process(expression)
         print('Resolved', expression.rstrip(), 'to', result)
