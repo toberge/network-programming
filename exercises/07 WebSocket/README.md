@@ -17,3 +17,11 @@ WebSocket library in `whereissock.js`,
 drawing board server in `server.js`.
 
 ![demo](it_works.png)
+
+## Usage
+
+Run `npm install` and `npm start` to start the server.
+
+Open [localhost:3000](http://localhost:3000)
+or `<your ip on the local network>:3000`
+in your browser.
