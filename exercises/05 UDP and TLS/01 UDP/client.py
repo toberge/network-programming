@@ -1,10 +1,11 @@
 import sys
 import socket
 
-if len(sys.argv) > 1 and sys.argv[1]:
+ADDRESS = ('', 8080)
+if len(sys.argv) == 2 and sys.argv[1]:
     ADDRESS = ('', int(sys.argv[1]))
-else:
-    ADDRESS = ('', 8080)
+elif len(sys.argv) == 3 and sys.argv[1] and sys.argv[2]:
+    ADDRESS = (sys.argv[1], int(sys.argv[2]))
 
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
     sock.connect(ADDRESS)
