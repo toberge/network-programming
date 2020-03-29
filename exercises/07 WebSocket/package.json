@@ -1,0 +1,21 @@
+{
+  "name": "whereissock",
+  "version": "1.0.0",
+  "description": "vewy schimple websocket server",
+  "main": "server.js",
+  "dependencies": {
+    "crypto-js": "^4.0.0",
+    "ip": "^1.1.5",
+    "nodemon": "2.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "NODE_PATH=\".:./node_modules\" nodemon server.js"
+  },
+  "keywords": [
+    "abababa"
+  ],
+  "author": "Tore Bergebakken",
+  "license": "ISC"
+}

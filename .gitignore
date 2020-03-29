@@ -1,9 +1,11 @@
 **/build
-**/.vscode
-**/a.out
-**/__pycache__
-**/target
+.vscode
+a.out
+__pycache__
+target
 *.class
 **/*.zip
 .idea
 out
+node_modules
+package-lock.json
