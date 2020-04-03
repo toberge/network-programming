@@ -119,3 +119,68 @@ evt endre /etc/ssh/ssh_config
 starte sshd med `systemctl start sshd`  
 og så er du good
 
+## Restarte applikasjonen
+
+- hva hvis vi endrer port eller noe?
+
+Vi trenger et prosessadministrasjonsprogram  
+in comes `systemd`
+
+> det e jo en del diskusjona rundt det systemet...
+
+La app-brukeren kjøre prosesser selv om den ikke er logga på:  
+`loginctl enable-linger app`
+
+(mulig du må opprette fila selv tho)
+
+Må så lage `~/.config/systemd/user`-mappe
+
+inn i fila `app.service`:
+```ini
+[Unit]
+Description=App
+; starte etter at nettverket er starta
+After=network.target 
+
+[Service]
+; riktig hjemmekatalog (NB check this)
+WorkingDirectory=/home/app/app
+; hva vi skal starte
+ExecStart=npm start
+Restart=always
+; "litt usikker på hva dette betyr"
+Type=simple
+; miljøvariabler!
+Environment=NODE_ENV=production
+
+[Install]
+; skal starte når maskina rebooter
+WantedBy=default.target
+```
+
+Det første vi må gjøre er å si at vi skal scanne denne katalogen!  
+`systemctl --user daemon-reload`  
+og  
+`systemctl --user enable app`
+
+`--user` for at dette ikke skal ha admintilgang
+
+Så kan `systemctl --user start app` starte servicen
+
+Kan se status og evt. feilmeldinger med `systemctl --user status app`
+
+kan også stoppe og restarte applikasjonen!
+
+`systemctl --user restart app`
+
+Fra gitlab CI: `ssh app@$SERVER_IP systemctl --user restart app`
+
+Hvis vi vil kjøre på port 80 eller en annen port < 1024 kan vi ikke være vanlig bruker  
+Kan bruke `iptables` til å omdirigere trafikken til 3000 eller noe
+
+blah blah diverse firmaer lar deg bruke en Docker-container i en Kubernetes-cluster blah blah
+
+> fort litt partisk kanskje
+
+Yeeeeah, jeg kan continuous integration nå ja...
+
