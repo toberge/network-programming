@@ -1,0 +1,56 @@
+image: node:latest
+
+stages:
+  - build  # Jobs placed in build-stage will run first
+  - test   # Jobs placed in tets-stage will run after build-jobs
+  - deploy # Jobs placed in build-stage will run last after test-jobs
+
+ping:
+  stage: build
+  script:
+    - ping -c 2 $SERVER_IP
+    - curl "$SERVER_IP:$SERVER_PORT" | grep gif | cut -d'"' -f4
+  # simply ping the server's IP
+  # and curl the contents of its running homepage
+  # just for funsies
+  only:
+    - master
+
+install:
+  stage: build
+  script:
+    - npm install
+  # Keep node_modules-folder for the following stages:
+  artifacts:
+    paths:
+      - node_modules
+
+test:
+  stage: test # Job test will run in parallel with the job flow
+  script:
+    - npm test
+
+flow:
+  stage: test # Job flow will run in parallel with the job test
+  script:
+    - npm install --global flow-bin
+    - flow check
+
+deploy:
+  stage: deploy
+  script:
+    - mkdir ~/.ssh
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+    - sed -ri "s/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/$SERVER_IP/g" ~/.ssh/known_hosts # replace IP
+    - echo $(grep -c "$SERVER_IP" ~/.ssh/known_hosts) # should be 8
+    - touch ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa # Required permission by ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - ssh -T "app@$SERVER_IP" # test connection before lengthier operations
+    - apt-get update
+    - apt-get install --assume-yes rsync
+    - rsync --archive --delete --exclude='.git' --exclude='node_modules' . "app@$SERVER_IP:app"
+    - ssh "app@$SERVER_IP" systemctl --user restart app
+  only:
+    - master
+
