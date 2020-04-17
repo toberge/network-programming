@@ -22,7 +22,7 @@ Being the automation-hungry person I am, I of course had to add a new `SERVER_IP
 sed -ri "s/[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/$SERVER_IP/g" ~/.ssh/known_hosts
 ```
 
-the editen example pipeline can be found in [.gitlab-ci.yml](.gitlab-ci.yml)
+the edited example pipeline can be found in [.gitlab-ci.yml](.gitlab-ci.yml)
 
 ## systemd setup
 
@@ -33,4 +33,13 @@ To demonstrate restarting a running process, we were tasked with creating a syst
 Since I decided to use my own laptop as a server, and since the GitLab instance of our school runs on the internal network, a problem of GitLab sometimes not being able to connect to any ports on my internal IP appeared. This was a significant annoyance.
 
 This made me put in a `ping`, an `ssh -T` and a `curl` to test if anything would work in the current pipeline.
+
+## systemd failing
+
+ahem  
+for odd reasons you need to do something like  
+```bash
+XDG_RUNTIME_DIR="/run/user/$(id -u app)" systemctl --user disable app
+```
+to avoid systemd not finding dbus
 
