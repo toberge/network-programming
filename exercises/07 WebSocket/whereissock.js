@@ -47,7 +47,6 @@ Sec-WebSocket-Accept: ${encoded}
      */
     __handleHandshake = (data, connection) => {
         let strings = data.toString().split('\r\n');
-        console.log(strings);
         
         if (strings[0] === 'GET / HTTP/1.1') {
             console.log('Incoming connection!');
@@ -112,26 +111,21 @@ Sec-WebSocket-Accept: ${encoded}
                 // remove...
             }
 
-            console.log(firstByte.toString(16))
-            console.log('Opcode was', opcode)
-
             switch(opcode) {
-                case 1: {
-                    // text message
+                case 0: // continuation frame, same code as text frame
+                case 1: { // text frame, with handling of FIN
                     let message = this.__decodeMessage(data);
                     // check if FIN is set
                     if (firstByte & 128) {
                         // final package in message, good to go.
                         if (buffer.length) {
                             // there were more parts of the message!
-                            console.log('aha longer yes')
                             message = [...buffer, message].join('')
+                            client.buffer = [] // reset buffer
                         }
-                        console.log('Client sent:', message);
                         this.onmessage(message);
                     } else {
-                        // then this is NOT the first byte in the message.
-                        // this is an attempt at handling this case.
+                        // then this is NOT the first part of the message.
                         buffer.push(message);
                     }
                     break;
@@ -156,10 +150,23 @@ Sec-WebSocket-Accept: ${encoded}
     }
 
     __decodeMessage = data => {
-        const length = data[1] & 127;
+        let length, pre
+        if (data[1] == 126) {
+            // 2 bytes
+            length = data.readUInt16(2);
+            pre = 4
+        } else if (data[1] == 127) {
+            // 8 bytes
+            length = data.readUInt64(2);
+            pre = 10
+        } else {
+            // just 0-125 in data[1]
+            length = data[1] & 127;
+            pre = 2
+        }
         // extract mask and masked data
-        const mask = data.slice(2, 6);
-        const masked = data.slice(6);
+        const mask = data.slice(pre, pre+4);
+        const masked = data.slice(pre+4);
         let message = '';
         for (let i = 0; i < length; i++) {
             // every ith byte is masked by the (i%4)th byte of the mask 
@@ -173,13 +180,22 @@ Sec-WebSocket-Accept: ${encoded}
     __encodeMessage = (message, close=false) => {
         let msgBuffer = Buffer.from(message);
         let length = msgBuffer.length;
-        if (length > 127) {
-            // TODO this *can* be handled but OH WELL
-            console.error('message too long....');
+        let lengthBytes
+        if (length < 126) {
+            lengthBytes = Buffer.allocUnsafe(1);
+            lengthBytes.writeUInt8(length);
+        } else if (length < Math.pow(2, 16)) {
+            lengthBytes = Buffer.allocUnsafe(3);
+            lengthBytes.writeUInt8(126);
+            lengthBytes.writeUInt16BE(length, 1);
+        } else {
+            lengthBytes = Buffer.allocUnsafe(9);
+            lengthBytes.writeUInt8(127);
+            lengthBytes.writeBigInt64BE(length, 1);
         }
         // send opcode 8 if close=true
         // otherwise opcode 1 for txt msg
-        return Buffer.from([(close? 0x88 : 0x81), length, ...msgBuffer]);
+        return Buffer.from([(close? 0x88 : 0x81), ...lengthBytes, ...msgBuffer]);
     }
 
     listen = (port = 3001, callback) =>

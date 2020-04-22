@@ -1,16 +1,16 @@
 from socket import socket, SOCK_DGRAM, AF_INET
 from pickled_calculator import process
-from pickle import loads, dumps
+import pickle
 import threading
 
 def handle(data, remote):
-    expression = loads(data)
+    expression = pickle.loads(data)
     try:
         result = process(expression)
         print('Resolved', expression, 'to', result)
-        socket.sendto(dumps(result), remote)
+        socket.sendto(pickle.dumps(result), remote)
     except Exception as error:
-        socket.sendto(dumps({'error': str(error)}), remote)
+        socket.sendto(pickle.dumps({'error': str(error)}), remote)
 
 ADDRESS = ('', 8080)
 
