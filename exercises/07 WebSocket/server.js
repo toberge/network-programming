@@ -50,5 +50,6 @@ ws.onmessage = message => {
   }
 }
 
-setTimeout(() => ws.broadcast('I hear you'), 8000);
+// just a test for >125 bytes long message from server
+//setTimeout(() => ws.broadcast('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), 8000);
 

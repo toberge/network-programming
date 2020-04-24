@@ -132,14 +132,25 @@ Sec-WebSocket-Accept: ${encoded}
                 }
                 case 8: {
                     // Comply with this close request
-                    const message = this.__decodeMessage(data);
-                    console.log('Received close request:', message);
+                    const code = this.__decodeMessage(data, true);
+                    console.log('Received close request:', code);
                     // send our own close frame
-                    const response = this.__encodeMessage('Closing as requested', true);
-                    connection.write(response);
-                    // destroy connection
-                    connection.removeAllListeners();
-                    connection.destroy();
+                    const ourcode = Buffer.allocUnsafe(2);
+                    if (code < 32768) {
+                        ourcode.writeInt16BE(code);
+                    } else {
+                        ourcode.writeInt16BE(1002);
+                    }
+                    const response = this.__encodeMessage('Closing as requested', ourcode);
+                    try {
+                        connection.write(response);
+                    } catch (e) {
+                        console.trace('Could not write at close', e);
+                    } finally {
+                        // destroy connection anyway
+                        connection.removeAllListeners();
+                        connection.destroy();
+                    }
                     break;
                 }
                 default:
@@ -149,7 +160,7 @@ Sec-WebSocket-Accept: ${encoded}
         }
     }
 
-    __decodeMessage = data => {
+    __decodeMessage = (data, close=false) => {
         let length, pre
         if (data[1] == 126) {
             // 2 bytes
@@ -167,6 +178,9 @@ Sec-WebSocket-Accept: ${encoded}
         // extract mask and masked data
         const mask = data.slice(pre, pre+4);
         const masked = data.slice(pre+4);
+        if (close) { // firefox does not send more than the status code
+            return Buffer.from([masked[0] ^ mask[0], masked[1] ^ mask[1]]).readUInt16BE();
+        }
         let message = '';
         for (let i = 0; i < length; i++) {
             // every ith byte is masked by the (i%4)th byte of the mask 
@@ -177,9 +191,10 @@ Sec-WebSocket-Accept: ${encoded}
         return message;
     }
 
-    __encodeMessage = (message, close=false) => {
+    __encodeMessage = (message, close=null) => {
         let msgBuffer = Buffer.from(message);
         let length = msgBuffer.length;
+        if (close) length += 2;
         let lengthBytes
         if (length < 126) {
             lengthBytes = Buffer.allocUnsafe(1);
@@ -195,7 +210,11 @@ Sec-WebSocket-Accept: ${encoded}
         }
         // send opcode 8 if close=true
         // otherwise opcode 1 for txt msg
-        return Buffer.from([(close? 0x88 : 0x81), ...lengthBytes, ...msgBuffer]);
+        if (close) {
+            return Buffer.from([0x88, ...lengthBytes, ...close, ...msgBuffer])
+        } else {
+            return Buffer.from([0x81, ...lengthBytes, ...msgBuffer]);
+        }
     }
 
     listen = (port = 3001, callback) =>
