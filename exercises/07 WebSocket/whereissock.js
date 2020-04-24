@@ -136,11 +136,7 @@ Sec-WebSocket-Accept: ${encoded}
                     console.log('Received close request:', code);
                     // send our own close frame
                     const ourcode = Buffer.allocUnsafe(2);
-                    if (code < 32768) {
-                        ourcode.writeInt16BE(code);
-                    } else {
-                        ourcode.writeInt16BE(1002);
-                    }
+                    ourcode.writeUInt16BE(code);
                     const response = this.__encodeMessage('Closing as requested', ourcode);
                     try {
                         connection.write(response);
@@ -191,10 +187,10 @@ Sec-WebSocket-Accept: ${encoded}
         return message;
     }
 
-    __encodeMessage = (message, close=null) => {
+    __encodeMessage = (message, statusCode=null) => {
         let msgBuffer = Buffer.from(message);
         let length = msgBuffer.length;
-        if (close) length += 2;
+        if (statusCode) length += 2;
         let lengthBytes
         if (length < 126) {
             lengthBytes = Buffer.allocUnsafe(1);
@@ -210,8 +206,8 @@ Sec-WebSocket-Accept: ${encoded}
         }
         // send opcode 8 if close=true
         // otherwise opcode 1 for txt msg
-        if (close) {
-            return Buffer.from([0x88, ...lengthBytes, ...close, ...msgBuffer])
+        if (statusCode) {
+            return Buffer.from([0x88, ...lengthBytes, ...statusCode, ...msgBuffer])
         } else {
             return Buffer.from([0x81, ...lengthBytes, ...msgBuffer]);
         }
