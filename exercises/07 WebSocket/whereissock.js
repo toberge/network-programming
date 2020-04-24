@@ -157,23 +157,22 @@ Sec-WebSocket-Accept: ${encoded}
     }
 
     __decodeMessage = (data, close=false) => {
-        let length, pre
-        if (data[1] == 126) {
+        let length = data[1] & 127, offset;
+        if (length == 126) {
             // 2 bytes
-            length = data.readUInt16(2);
-            pre = 4
-        } else if (data[1] == 127) {
+            length = data.readUInt16BE(2);
+            offset = 4
+        } else if (length == 127) {
             // 8 bytes
-            length = data.readUInt64(2);
-            pre = 10
+            length = data.readUInt64BE(2);
+            offset = 10
         } else {
             // just 0-125 in data[1]
-            length = data[1] & 127;
-            pre = 2
+            offset = 2
         }
         // extract mask and masked data
-        const mask = data.slice(pre, pre+4);
-        const masked = data.slice(pre+4);
+        const mask = data.slice(offset, offset+4);
+        const masked = data.slice(offset+4);
         if (close) { // firefox does not send more than the status code
             return Buffer.from([masked[0] ^ mask[0], masked[1] ^ mask[1]]).readUInt16BE();
         }

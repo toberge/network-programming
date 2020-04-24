@@ -72,6 +72,8 @@
         }
       }
       ws.onopen = () => {
+        // just a test for >125 bytes long message from client
+        ws.send('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
         ws.send('beam me up scotty');
       }
 
